@@ -2,4 +2,5 @@
 .venv
 .рус
 __pycache__
+.opencode
 
