@@ -3,7 +3,7 @@ from db_manager import *
 import requests
 import re
 import json
-from flask import jsonify, render_template, request, redirect
+from flask import jsonify, render_template, request, redirect, url_for
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_manager, current_user
@@ -21,6 +21,11 @@ login_manager.login_view = 'login'
 
 
 #-----------------------------------   FRONTEND   -----------------------------------
+
+@app.route("/")
+def index():
+    return redirect(url_for("login"))
+
 
 @app.route("/home")
 @login_required
