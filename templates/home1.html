@@ -579,14 +579,33 @@
                 .then(layout => {
                     const grid = document.getElementById('servicesGrid');
                     grid.innerHTML = '';
-                    layout.forEach(item => {
-                        if (item.is_widget) {
-                            addWidgetToGrid(item);
-                        } else {
-                            const service = services.find(s => s.id === item.service_id);
-                            if (service) addServiceToGrid(service, item);
-                        }
-                    });
+
+                    if (!layout || layout.length === 0) {
+                        const defaults = [
+                            { is_widget: true, widget_type: 'schedule', id: 'def-schedule', position: 0 },
+                            { is_widget: true, widget_type: 'weather', id: 'def-weather', position: 1 },
+                            { service_id: 'exit_application', id: 'def-exit', position: 2 },
+                            { service_id: 'events', id: 'def-events', position: 3 },
+                            { service_id: 'account', id: 'def-account', position: 4 },
+                        ];
+                        defaults.forEach(item => {
+                            if (item.is_widget) {
+                                addWidgetToGrid(item);
+                            } else {
+                                const service = services.find(s => s.id === item.service_id);
+                                if (service) addServiceToGrid(service, item);
+                            }
+                        });
+                    } else {
+                        layout.forEach(item => {
+                            if (item.is_widget) {
+                                addWidgetToGrid(item);
+                            } else {
+                                const service = services.find(s => s.id === item.service_id);
+                                if (service) addServiceToGrid(service, item);
+                            }
+                        });
+                    }
                     initSortable();
                 });
         }
