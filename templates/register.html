@@ -222,16 +222,16 @@
             </div>
 
             <form class="form" id="registerForm" method="POST" action="/register" novalidate>
-                <label class="field">
+                <label class="field {{ 'has-error' if errors and errors.login }}">
                     <span class="field__label">Логин</span>
-                    <input type="text" name="login" id="login" placeholder="Придумайте логин" autocomplete="username" required>
-                    <span class="field-error" id="login-error" role="alert"></span>
+                    <input type="text" name="login" id="login" placeholder="Придумайте логин" autocomplete="username" required value="{{ form_data.login if form_data else '' }}">
+                    <span class="field-error" id="login-error" role="alert">{{ errors.login if errors and errors.login else '' }}</span>
                 </label>
 
-                <label class="field">
+                <label class="field {{ 'has-error' if errors and errors.email }}">
                     <span class="field__label">Email</span>
-                    <input type="email" name="email" id="email" placeholder="example@mail.ru" autocomplete="email" required>
-                    <span class="field-error" id="email-error" role="alert"></span>
+                    <input type="email" name="email" id="email" placeholder="example@mail.ru" autocomplete="email" required value="{{ form_data.email if form_data else '' }}">
+                    <span class="field-error" id="email-error" role="alert">{{ errors.email if errors and errors.email else '' }}</span>
                 </label>
 
                 <label class="field">
