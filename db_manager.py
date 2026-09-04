@@ -1,28 +1,33 @@
-import sqlite3
-import os
+import psycopg2
+import psycopg2.extras
+import config
 from flask_login import UserMixin
-
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mshp.db")
 
 
 def _get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    return psycopg2.connect(
+        host=config.DB_HOST,
+        port=config.DB_PORT,
+        dbname=config.DB_NAME,
+        user=config.DB_USER,
+        password=config.DB_PASSWORD
+    )
 
 
 def init_db():
     conn = _get_db()
-    conn.execute("""
+    cur = conn.cursor()
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            login TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            is_confirmed INTEGER DEFAULT 0
+            id SERIAL PRIMARY KEY,
+            login VARCHAR(80) UNIQUE NOT NULL,
+            email VARCHAR(120) UNIQUE NOT NULL,
+            password VARCHAR(256) NOT NULL,
+            is_confirmed BOOLEAN DEFAULT FALSE
         )
     """)
     conn.commit()
+    cur.close()
     conn.close()
 
 
@@ -32,76 +37,95 @@ class User(UserMixin):
         self.login = login
         self.email = email
         self.password = password
-        self.is_confirmed = bool(is_confirmed)
+        self.is_confirmed = is_confirmed
+
+
+def _row_to_user(row):
+    if row:
+        return User(row["id"], row["login"], row["email"], row["password"], row["is_confirmed"])
+    return None
 
 
 def get_user_by_id(user_id):
     conn = _get_db()
-    row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+    row = cur.fetchone()
+    cur.close()
     conn.close()
-    if row:
-        return User(row["id"], row["login"], row["email"], row["password"], row["is_confirmed"])
-    return None
+    return _row_to_user(row)
 
 
 def get_user_by_login(login):
     conn = _get_db()
-    row = conn.execute("SELECT * FROM users WHERE login = ?", (login,)).fetchone()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("SELECT * FROM users WHERE login = %s", (login,))
+    row = cur.fetchone()
+    cur.close()
     conn.close()
-    if row:
-        return User(row["id"], row["login"], row["email"], row["password"], row["is_confirmed"])
-    return None
+    return _row_to_user(row)
 
 
 def get_user_by_email(email):
     conn = _get_db()
-    row = conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+    row = cur.fetchone()
+    cur.close()
     conn.close()
-    if row:
-        return User(row["id"], row["login"], row["email"], row["password"], row["is_confirmed"])
-    return None
+    return _row_to_user(row)
 
 
 def create_user(login, email, password):
     conn = _get_db()
-    cursor = conn.execute(
-        "INSERT INTO users (login, email, password, is_confirmed) VALUES (?, ?, ?, 0)",
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute(
+        "INSERT INTO users (login, email, password, is_confirmed) VALUES (%s, %s, %s, FALSE) RETURNING *",
         (login, email, password)
     )
+    row = cur.fetchone()
     conn.commit()
-    user_id = cursor.lastrowid
+    cur.close()
     conn.close()
-    return get_user_by_id(user_id)
+    return _row_to_user(row)
 
 
 def confirm_user(user_id):
     conn = _get_db()
-    conn.execute("UPDATE users SET is_confirmed = 1 WHERE id = ?", (user_id,))
+    cur = conn.cursor()
+    cur.execute("UPDATE users SET is_confirmed = TRUE WHERE id = %s", (user_id,))
     conn.commit()
+    cur.close()
     conn.close()
 
 
 def reject_user(user_id):
     conn = _get_db()
-    conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    cur = conn.cursor()
+    cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
     conn.commit()
+    cur.close()
     conn.close()
 
 
 def get_all_users():
     conn = _get_db()
-    rows = conn.execute("SELECT * FROM users ORDER BY id").fetchall()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cur.execute("SELECT id, login, email, is_confirmed FROM users ORDER BY id")
+    rows = cur.fetchall()
+    cur.close()
     conn.close()
-    return [
-        {"id": r["id"], "login": r["login"], "email": r["email"], "is_confirmed": bool(r["is_confirmed"])}
-        for r in rows
-    ]
+    return [dict(r) for r in rows]
 
 
 def get_stats():
     conn = _get_db()
-    total = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-    confirmed = conn.execute("SELECT COUNT(*) FROM users WHERE is_confirmed = 1").fetchone()[0]
+    cur = conn.cursor()
+    cur.execute("SELECT COUNT(*) FROM users")
+    total = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) FROM users WHERE is_confirmed = TRUE")
+    confirmed = cur.fetchone()[0]
+    cur.close()
     conn.close()
     return {"total": total, "confirmed": confirmed, "pending": total - confirmed}
 
