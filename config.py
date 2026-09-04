@@ -17,4 +17,4 @@ IOT_KEY=os.environ["IOT_KEY"]
 SECRET_KEY=os.environ["SECRET_KEY"]
 
 # База данных (PostgreSQL) #
-DATABASE_URL=os.environ.get("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/mshp")
+DATABASE_URL=os.environ["DATABASE_URL"]

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSHP: 404 — Страница не найдена</title>
+    <link rel="icon" href="/static/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,300..500,0..1,0" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --ink: #111111;
+            --ink-soft: #6b6b6b;
+            --panel: #ffffff;
+            --radius-lg: 28px;
+            --accent: #5059FF;
+            --accent-hover: #3d44cc;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .lava {
+            position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+        }
+        .blob {
+            position: absolute; width: 46vmax; height: 46vmax; filter: blur(60px); will-change: transform, border-radius;
+        }
+        .blob--primary {
+            left: -14vmax; top: -10vmax; background: var(--accent); opacity: 0.18;
+            animation: drift-a 22s ease-in-out infinite;
+        }
+        .blob--red {
+            right: -16vmax; bottom: -14vmax; background: #FF5050; opacity: 0.14;
+            animation: drift-b 26s ease-in-out infinite;
+        }
+        @keyframes drift-a {
+            0%   { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; transform: translate(0, 0) scale(1); }
+            33%  { border-radius: 63% 37% 41% 59% / 55% 63% 37% 45%; transform: translate(3vmax, 4vmax) scale(1.06); }
+            66%  { border-radius: 37% 63% 56% 44% / 33% 52% 48% 67%; transform: translate(-2vmax, 3vmax) scale(0.97); }
+            100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; transform: translate(0, 0) scale(1); }
+        }
+        @keyframes drift-b {
+            0%   { border-radius: 55% 45% 38% 62% / 47% 40% 60% 53%; transform: translate(0, 0) scale(1); }
+            33%  { border-radius: 40% 60% 62% 38% / 62% 48% 52% 38%; transform: translate(-4vmax, -3vmax) scale(1.05); }
+            66%  { border-radius: 62% 38% 45% 55% / 38% 58% 42% 62%; transform: translate(3vmax, -4vmax) scale(0.96); }
+            100% { border-radius: 55% 45% 38% 62% / 47% 40% 60% 53%; transform: translate(0, 0) scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .blob { animation: none !important; }
+            .panel { opacity: 1 !important; transform: none !important; }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stage { position: relative; z-index: 1; padding: 24px; }
+
+        .panel {
+            width: 100%; max-width: 420px; margin: 0 auto;
+            background: rgba(255,255,255,0.82);
+            backdrop-filter: blur(22px) saturate(140%);
+            -webkit-backdrop-filter: blur(22px) saturate(140%);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 30px 70px -25px rgba(0,0,0,0.25);
+            padding: 48px 36px 40px;
+            text-align: center;
+            opacity: 0; animation: scaleIn 0.5s 0.1s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+
+        .error-code {
+            font-size: 96px; font-weight: 800; line-height: 1;
+            background: linear-gradient(135deg, var(--accent), #FF5050);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .error-title {
+            font-size: 20px; font-weight: 700; margin: 0 0 8px;
+            opacity: 0; animation: fadeInUp 0.4s 0.25s both;
+        }
+
+        .error-desc {
+            font-size: 14px; color: var(--ink-soft); margin: 0 0 28px; line-height: 1.5;
+            opacity: 0; animation: fadeInUp 0.4s 0.3s both;
+        }
+
+        .btn {
+            appearance: none; border: none; border-radius: 18px;
+            padding: 14px 32px; font-size: 15px; font-weight: 600;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+            text-decoration: none; transition: transform 0.12s, background 0.15s;
+            font-family: inherit;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn--primary { background: var(--accent); color: #fff; }
+        .btn--primary:hover { background: var(--accent-hover); }
+
+        .btn-row {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+            opacity: 0; animation: fadeInUp 0.4s 0.35s both;
+        }
+    </style>
+</head>
+<body>
+    <div class="lava" aria-hidden="true">
+        <div class="blob blob--primary"></div>
+        <div class="blob blob--red"></div>
+    </div>
+
+    <main class="stage">
+        <div class="panel">
+            <div class="error-code">404</div>
+            <h1 class="error-title">Страница не найдена</h1>
+            <p class="error-desc">Запрашиваемая страница не существует или была перемещена.</p>
+            <div class="btn-row">
+                <a href="/" class="btn btn--primary">
+                    <span class="material-symbols-outlined" style="font-size:18px;">home</span>
+                    На главную
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
