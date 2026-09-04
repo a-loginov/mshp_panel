@@ -27,3 +27,8 @@ login_manager.login_view = 'login'
 def home():
     if not current_user.is_confirmed: return render_template("not_dostup.html")
     return render_template("home1.html")
+
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
