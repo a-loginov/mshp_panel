@@ -684,13 +684,13 @@
             <!-- Password Panel -->
             <div class="method-panel is-active" id="methodPassword">
                 <form class="form" id="loginForm" method="POST" action="/login" novalidate>
-                    <label class="field">
+                    <label class="field {{ 'has-error' if errors and errors.login }}">
                         <span class="field__label">Логин</span>
-                        <input type="text" name="login" id="login" placeholder="Введите логин" autocomplete="username" required>
-                        <span class="field-error" id="login-error" role="alert"></span>
+                        <input type="text" name="login" id="login" placeholder="Введите логин" autocomplete="username" required value="{{ form_data.login if form_data else '' }}">
+                        <span class="field-error" id="login-error" role="alert">{{ errors.login if errors and errors.login else '' }}</span>
                     </label>
 
-                    <label class="field">
+                    <label class="field {{ 'has-error' if errors and errors.password }}">
                         <span class="field__label">Пароль</span>
                         <div style="position:relative;">
                             <input type="password" name="password" id="password" placeholder="Введите пароль" autocomplete="current-password" required style="width:100%;padding-right:44px;">
@@ -698,7 +698,7 @@
                                 <span class="material-symbols-outlined" id="eyeIcon" style="font-size:20px;">visibility_off</span>
                             </button>
                         </div>
-                        <span class="field-error" id="password-error" role="alert"></span>
+                        <span class="field-error" id="password-error" role="alert">{{ errors.password if errors and errors.password else '' }}</span>
                     </label>
 
                     <button type="submit" class="btn btn--primary" id="btnLogin">
