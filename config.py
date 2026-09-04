@@ -18,3 +18,6 @@ SECRET_KEY=os.environ["SECRET_KEY"]
 
 # База данных (PostgreSQL) #
 DATABASE_URL=os.environ["DATABASE_URL"]
+
+# Пароль администратора #
+ADMIN_PASSWORD=os.environ["ADMIN_PASSWORD"]

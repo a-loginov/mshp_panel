@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSHP: Админ-панель</title>
+    <link rel="icon" href="/static/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,300..500,0..1,0" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --ink: #111111;
+            --ink-soft: #6b6b6b;
+            --line: #e2e2e2;
+            --panel: #ffffff;
+            --panel-border: rgba(255,255,255,0.6);
+            --panel-shadow: 0 30px 70px -25px rgba(0,0,0,0.25);
+            --input-bg: #ffffff;
+            --radius-lg: 28px;
+            --radius-md: 18px;
+            --accent: #5059FF;
+            --accent-hover: #3d44cc;
+            --overlay-bg: rgba(245,245,245,0.92);
+            --red: #FF3B30;
+            --red-bg: rgba(255,59,48,0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f12;
+                --ink: #f0f0f0;
+                --ink-soft: #8a8a9a;
+                --line: rgba(255,255,255,0.1);
+                --panel: rgba(28, 28, 35, 0.82);
+                --panel-border: rgba(255,255,255,0.08);
+                --panel-shadow: 0 30px 70px -25px rgba(0,0,0,0.6);
+                --input-bg: rgba(38, 38, 48, 0.8);
+                --accent: #6b75ff;
+                --accent-hover: #818aff;
+                --overlay-bg: rgba(15,15,18,0.92);
+                --red: #FF453A;
+                --red-bg: rgba(255,69,58,0.15);
+            }
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .lava { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; width: 46vmax; height: 46vmax; filter: blur(60px); will-change: transform, border-radius; }
+        .blob--primary { left: -14vmax; top: -10vmax; background: var(--accent); opacity: 0.18; animation: drift-a 22s ease-in-out infinite; }
+        .blob--red { right: -16vmax; bottom: -14vmax; background: var(--red); opacity: 0.14; animation: drift-b 26s ease-in-out infinite; }
+        @keyframes drift-a {
+            0%   { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; transform: translate(0, 0) scale(1); }
+            33%  { border-radius: 63% 37% 41% 59% / 55% 63% 37% 45%; transform: translate(3vmax, 4vmax) scale(1.06); }
+            66%  { border-radius: 37% 63% 56% 44% / 33% 52% 48% 67%; transform: translate(-2vmax, 3vmax) scale(0.97); }
+            100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; transform: translate(0, 0) scale(1); }
+        }
+        @keyframes drift-b {
+            0%   { border-radius: 55% 45% 38% 62% / 47% 40% 60% 53%; transform: translate(0, 0) scale(1); }
+            33%  { border-radius: 40% 60% 62% 38% / 62% 48% 52% 38%; transform: translate(-4vmax, -3vmax) scale(1.05); }
+            66%  { border-radius: 62% 38% 45% 55% / 38% 58% 42% 62%; transform: translate(3vmax, -4vmax) scale(0.96); }
+            100% { border-radius: 55% 45% 38% 62% / 47% 40% 60% 53%; transform: translate(0, 0) scale(1); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .blob { animation: none !important; }
+            .panel { opacity: 1 !important; transform: none !important; }
+        }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .stage { position: relative; z-index: 1; padding: 24px; }
+
+        .panel {
+            width: 100%; max-width: 400px; margin: 0 auto;
+            background: var(--panel);
+            backdrop-filter: blur(22px) saturate(140%);
+            -webkit-backdrop-filter: blur(22px) saturate(140%);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--panel-shadow);
+            padding: 48px 36px 40px;
+            text-align: center;
+            opacity: 0; animation: scaleIn 0.5s 0.1s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+
+        .icon-circle {
+            width: 72px; height: 72px; margin: 0 auto 20px;
+            border-radius: 50%;
+            background: var(--red-bg);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; animation: fadeInUp 0.4s 0.15s both;
+        }
+        .icon-circle .material-symbols-outlined { font-size: 36px; color: var(--red); }
+
+        .panel h1 {
+            font-size: 22px; font-weight: 700; margin: 0 0 8px;
+            opacity: 0; animation: fadeInUp 0.4s 0.2s both;
+        }
+
+        .panel p {
+            font-size: 14px; color: var(--ink-soft); margin: 0 0 28px;
+            opacity: 0; animation: fadeInUp 0.4s 0.25s both;
+        }
+
+        .form {
+            display: flex; flex-direction: column; gap: 14px;
+            opacity: 0; animation: fadeInUp 0.4s 0.3s both;
+        }
+
+        .field { display: flex; flex-direction: column; gap: 6px; }
+
+        .field input {
+            appearance: none; border: 1px solid var(--line); background: var(--input-bg);
+            border-radius: var(--radius-md); padding: 14px 16px; font-size: 15px;
+            color: var(--ink); outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+            font-family: inherit; width: 100%;
+        }
+        .field input::placeholder { color: var(--ink-soft); }
+        .field input:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
+
+        .btn {
+            appearance: none; border: none; border-radius: var(--radius-md);
+            padding: 14px 18px; font-size: 15px; font-weight: 600;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            gap: 10px; text-decoration: none; transition: transform 0.12s, background 0.15s;
+            font-family: inherit;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn--primary { background: var(--accent); color: #fff; margin-top: 4px; }
+        .btn--primary:hover { background: var(--accent-hover); }
+        .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+        .error-msg {
+            background: var(--red-bg);
+            color: var(--red);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            opacity: 0; animation: fadeInUp 0.3s 0.35s both;
+        }
+
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            margin-top: 20px; font-size: 13px; color: var(--ink-soft);
+            text-decoration: none; font-weight: 500;
+            opacity: 0; animation: fadeInUp 0.4s 0.4s both;
+        }
+        .back-link:hover { color: var(--ink); }
+        .back-link .material-symbols-outlined { font-size: 16px; }
+
+        @media (max-width: 420px) { .panel { padding: 32px 22px 26px; border-radius: var(--radius-md); } .blob { filter: blur(80px); } }
+        @media (min-width: 900px) {
+            body { overflow: auto; }
+            .stage { padding: 40px; min-height: 100vh; min-height: 100dvh; align-items: center; }
+            .panel { max-width: 420px; padding: 52px 48px 44px; border-radius: 32px; }
+            .icon-circle { width: 80px; height: 80px; margin-bottom: 24px; }
+            .icon-circle .material-symbols-outlined { font-size: 40px; }
+            .panel h1 { font-size: 25px; }
+            .blob { width: 38vmax; height: 38vmax; }
+        }
+    </style>
+</head>
+<body>
+    <div class="lava" aria-hidden="true">
+        <div class="blob blob--primary"></div>
+        <div class="blob blob--red"></div>
+    </div>
+
+    <main class="stage">
+        <div class="panel">
+            <div class="icon-circle">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
+            </div>
+            <h1>Админ-панель</h1>
+            <p>Введите пароль администратора для входа</p>
+
+            {% if error %}
+            <div class="error-msg">{{ error }}</div>
+            {% endif %}
+
+            <form class="form" method="POST" action="/admin/login">
+                <label class="field">
+                    <input type="password" name="password" placeholder="Пароль администратора" autocomplete="current-password" required autofocus>
+                </label>
+                <button type="submit" class="btn btn--primary">
+                    <span class="material-symbols-outlined" style="font-size:18px;">lock_open</span>
+                    Войти
+                </button>
+            </form>
+
+            <a href="/" class="back-link">
+                <span class="material-symbols-outlined">arrow_back</span>
+                На главную
+            </a>
+        </div>
+    </main>
+</body>
+</html>

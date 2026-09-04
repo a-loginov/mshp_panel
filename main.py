@@ -6,7 +6,7 @@ from datetime import timedelta
 
 
 app = Flask(__name__)
-app.config.update(SECRET_KEY=config.SECRET_KEY)
+app.config.update(SECRET_KEY=config.SECRET_KEY, ADMIN_PASSWORD=config.ADMIN_PASSWORD)
 app.permanent_session_lifetime = timedelta(days=365)
 
 bcrypt = Bcrypt(app)
@@ -17,9 +17,11 @@ login_manager.login_view = 'login'
 
 from api.accounts import register_accounts
 from api.exit_system import register_exit_system
+from api.admin import register_admin
 
 register_accounts(app, bcrypt, login_manager)
 register_exit_system(app)
+register_admin(app, bcrypt)
 
 
 @app.errorhandler(404)

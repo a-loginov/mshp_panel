@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSHP: Админ-панель</title>
+    <link rel="icon" href="/static/favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,300..500,0..1,0" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --ink: #111111;
+            --ink-soft: #6b6b6b;
+            --line: #e2e2e2;
+            --surface: #ffffff;
+            --surface-alt: #f8f8fa;
+            --surface-hover: #f0f0f2;
+            --panel-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            --card-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+            --accent: #5059FF;
+            --accent-hover: #3d44cc;
+            --accent-soft: rgba(80, 89, 255, 0.1);
+            --green: #34C759;
+            --green-soft: rgba(52, 199, 89, 0.1);
+            --red: #FF3B30;
+            --red-soft: rgba(255, 59, 48, 0.1);
+            --orange: #FF9500;
+            --orange-soft: rgba(255, 149, 0, 0.1);
+            --blue: #007AFF;
+            --blue-soft: rgba(0, 122, 255, 0.1);
+            --purple: #AF52DE;
+            --purple-soft: rgba(175, 82, 222, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f12;
+                --ink: #f0f0f0;
+                --ink-soft: #8a8a9a;
+                --line: rgba(255,255,255,0.08);
+                --surface: rgba(28, 28, 35, 0.9);
+                --surface-alt: rgba(38, 38, 48, 0.6);
+                --surface-hover: rgba(50, 50, 62, 0.7);
+                --panel-shadow: 0 8px 32px rgba(0,0,0,0.3);
+                --card-shadow: 0 2px 12px rgba(0,0,0,0.2);
+                --accent: #6b75ff;
+                --accent-hover: #818aff;
+                --accent-soft: rgba(107, 117, 255, 0.15);
+                --green: #30D158;
+                --green-soft: rgba(48, 209, 88, 0.15);
+                --red: #FF453A;
+                --red-soft: rgba(255, 69, 58, 0.15);
+                --orange: #FFB340;
+                --orange-soft: rgba(255, 179, 64, 0.15);
+                --blue: #0A84FF;
+                --blue-soft: rgba(10, 132, 255, 0.15);
+                --purple: #BF5AF2;
+                --purple-soft: rgba(191, 90, 242, 0.15);
+            }
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+            font-size: 20px; line-height: 1; vertical-align: middle; user-select: none;
+        }
+
+        .topbar {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--surface);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--line);
+            padding: 16px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .topbar__left { display: flex; align-items: center; gap: 12px; }
+
+        .topbar__logo {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .topbar__title { font-size: 18px; font-weight: 700; }
+
+        .topbar__badge {
+            background: var(--red-soft);
+            color: var(--red);
+            font-size: 11px; font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .topbar__right { display: flex; align-items: center; gap: 10px; }
+
+        .topbar__btn {
+            appearance: none; border: none; background: var(--surface-alt);
+            border-radius: var(--radius-sm); padding: 8px 14px;
+            font-size: 13px; font-weight: 600; color: var(--ink-soft);
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
+            transition: all 0.15s; font-family: inherit; text-decoration: none;
+        }
+        .topbar__btn:hover { background: var(--surface-hover); color: var(--ink); }
+        .topbar__btn .material-symbols-outlined { font-size: 16px; }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            display: flex; flex-direction: column; gap: 8px;
+        }
+
+        .stat-card__icon {
+            width: 40px; height: 40px;
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .stat-card__icon .material-symbols-outlined { font-size: 20px; }
+        .stat-card__icon--blue { background: var(--blue-soft); color: var(--blue); }
+        .stat-card__icon--green { background: var(--green-soft); color: var(--green); }
+        .stat-card__icon--orange { background: var(--orange-soft); color: var(--orange); }
+        .stat-card__icon--purple { background: var(--purple-soft); color: var(--purple); }
+
+        .stat-card__value { font-size: 28px; font-weight: 800; line-height: 1; }
+        .stat-card__label { font-size: 13px; color: var(--ink-soft); font-weight: 500; }
+
+        .section {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .section__header {
+            padding: 20px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .section__title {
+            font-size: 16px; font-weight: 700;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .section__title .material-symbols-outlined { font-size: 20px; color: var(--accent); }
+
+        .section__body { padding: 0; }
+
+        .user-list { list-style: none; margin: 0; padding: 0; }
+
+        .user-item {
+            display: flex; align-items: center; gap: 16px;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--line);
+            transition: background 0.15s;
+        }
+        .user-item:last-child { border-bottom: none; }
+        .user-item:hover { background: var(--surface-alt); }
+
+        .user-item__avatar {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .user-item__avatar .material-symbols-outlined { font-size: 22px; color: var(--accent); }
+
+        .user-item__info { flex: 1; min-width: 0; }
+
+        .user-item__name {
+            font-size: 14px; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .user-item__meta {
+            font-size: 12px; color: var(--ink-soft); margin-top: 2px;
+        }
+
+        .user-item__status {
+            font-size: 11px; font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .user-item__status--pending { background: var(--orange-soft); color: var(--orange); }
+        .user-item__status--confirmed { background: var(--green-soft); color: var(--green); }
+
+        .user-item__actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+        .action-btn {
+            appearance: none; border: none;
+            width: 36px; height: 36px;
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.15s;
+        }
+        .action-btn .material-symbols-outlined { font-size: 18px; }
+
+        .action-btn--confirm { background: var(--green-soft); color: var(--green); }
+        .action-btn--confirm:hover { background: var(--green); color: #fff; }
+
+        .action-btn--reject { background: var(--red-soft); color: var(--red); }
+        .action-btn--reject:hover { background: var(--red); color: #fff; }
+
+        .empty-state {
+            padding: 48px 24px;
+            text-align: center;
+            color: var(--ink-soft);
+        }
+        .empty-state .material-symbols-outlined { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+        .empty-state p { font-size: 14px; margin: 0; }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px 24px;
+        }
+
+        .service-card {
+            background: var(--surface-alt);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--ink);
+        }
+        .service-card:hover { background: var(--surface-hover); transform: translateY(-2px); }
+
+        .service-card__icon {
+            width: 48px; height: 48px;
+            border-radius: var(--radius-sm);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .service-card__icon .material-symbols-outlined { font-size: 24px; }
+
+        .service-card__title { font-size: 13px; font-weight: 600; }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--ink);
+            color: var(--bg);
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        @media (max-width: 640px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .services-grid { grid-template-columns: repeat(2, 1fr); }
+            .topbar { padding: 12px 16px; }
+            .container { padding: 16px; }
+        }
+
+        @media (max-width: 420px) {
+            .user-item { padding: 12px 16px; gap: 12px; }
+            .user-item__actions { flex-direction: column; gap: 4px; }
+            .action-btn { width: 32px; height: 32px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar__left">
+            <img src="/static/favicon.png" alt="MSHP" class="topbar__logo">
+            <span class="topbar__title">Админ-панель</span>
+            <span class="topbar__badge" id="pendingBadge">0</span>
+        </div>
+        <div class="topbar__right">
+            <a href="/home" class="topbar__btn">
+                <span class="material-symbols-outlined">home</span>
+                На сайт
+            </a>
+            <a href="/admin/logout" class="topbar__btn">
+                <span class="material-symbols-outlined">logout</span>
+                Выйти
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-card__icon stat-card__icon--blue">
+                    <span class="material-symbols-outlined">group</span>
+                </div>
+                <div class="stat-card__value" id="statTotal">0</div>
+                <div class="stat-card__label">Всего пользователей</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon stat-card__icon--green">
+                    <span class="material-symbols-outlined">check_circle</span>
+                </div>
+                <div class="stat-card__value" id="statConfirmed">0</div>
+                <div class="stat-card__label">Подтверждено</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon stat-card__icon--orange">
+                    <span class="material-symbols-outlined">pending</span>
+                </div>
+                <div class="stat-card__value" id="statPending">0</div>
+                <div class="stat-card__label">Ожидают</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__icon stat-card__icon--purple">
+                    <span class="material-symbols-outlined">trending_up</span>
+                </div>
+                <div class="stat-card__value">100%</div>
+                <div class="stat-card__label">Аптайм</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section__header">
+                <div class="section__title">
+                    <span class="material-symbols-outlined">group</span>
+                    Пользователи
+                </div>
+                <button class="topbar__btn" onclick="loadUsers()" style="padding: 6px 12px;">
+                    <span class="material-symbols-outlined" style="font-size:14px;">refresh</span>
+                    Обновить
+                </button>
+            </div>
+            <div class="section__body">
+                <ul class="user-list" id="userList">
+                    <li class="empty-state">
+                        <span class="material-symbols-outlined">hourglass_empty</span>
+                        <p>Загрузка...</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section__header">
+                <div class="section__title">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    Сервисы
+                </div>
+            </div>
+            <div class="services-grid">
+                <a href="/api/admin/stats" class="service-card" target="_blank">
+                    <div class="service-card__icon stat-card__icon--blue">
+                        <span class="material-symbols-outlined">analytics</span>
+                    </div>
+                    <div class="service-card__title">Статистика API</div>
+                </a>
+                <a href="/home" class="service-card">
+                    <div class="service-card__icon stat-card__icon--green">
+                        <span class="material-symbols-outlined">home</span>
+                    </div>
+                    <div class="service-card__title">Личный кабинет</div>
+                </a>
+                <a href="/admin/logout" class="service-card">
+                    <div class="service-card__icon stat-card__icon--orange">
+                        <span class="material-symbols-outlined">logout</span>
+                    </div>
+                    <div class="service-card__title">Выйти из панели</div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function updateStats(users) {
+            const total = users.length;
+            const confirmed = users.filter(u => u.is_confirmed).length;
+            const pending = total - confirmed;
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statConfirmed').textContent = confirmed;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('pendingBadge').textContent = pending;
+            document.getElementById('pendingBadge').style.display = pending > 0 ? 'inline' : 'none';
+        }
+
+        function renderUsers(users) {
+            const list = document.getElementById('userList');
+            if (!users || users.length === 0) {
+                list.innerHTML = `
+                    <li class="empty-state">
+                        <span class="material-symbols-outlined">person_off</span>
+                        <p>Пользователей пока нет</p>
+                    </li>`;
+                return;
+            }
+
+            list.innerHTML = users.map(user => `
+                <li class="user-item" data-id="${user.id}">
+                    <div class="user-item__avatar">
+                        <span class="material-symbols-outlined">person</span>
+                    </div>
+                    <div class="user-item__info">
+                        <div class="user-item__name">${escapeHtml(user.login)}</div>
+                        <div class="user-item__meta">${escapeHtml(user.email || '—')}</div>
+                    </div>
+                    <span class="user-item__status ${user.is_confirmed ? 'user-item__status--confirmed' : 'user-item__status--pending'}">
+                        ${user.is_confirmed ? 'Подтверждён' : 'Ожидает'}
+                    </span>
+                    <div class="user-item__actions">
+                        ${!user.is_confirmed ? `
+                            <button class="action-btn action-btn--confirm" onclick="confirmUser(${user.id})" title="Подтвердить">
+                                <span class="material-symbols-outlined">check</span>
+                            </button>
+                            <button class="action-btn action-btn--reject" onclick="rejectUser(${user.id})" title="Отклонить">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        ` : `
+                            <button class="action-btn action-btn--reject" onclick="rejectUser(${user.id})" title="Отозвать доступ">
+                                <span class="material-symbols-outlined">block</span>
+                            </button>
+                        `}
+                    </div>
+                </li>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function loadUsers() {
+            try {
+                const res = await fetch('/api/admin/users');
+                const users = await res.json();
+                renderUsers(users);
+                updateStats(users);
+            } catch {
+                document.getElementById('userList').innerHTML = `
+                    <li class="empty-state">
+                        <span class="material-symbols-outlined">cloud_off</span>
+                        <p>Ошибка загрузки данных</p>
+                    </li>`;
+            }
+        }
+
+        async function confirmUser(id) {
+            try {
+                await fetch(`/api/admin/users/${id}/confirm`, { method: 'POST' });
+                showToast('Пользователь подтверждён');
+                loadUsers();
+            } catch {
+                showToast('Ошибка при подтверждении');
+            }
+        }
+
+        async function rejectUser(id) {
+            if (!confirm('Вы уверены?')) return;
+            try {
+                await fetch(`/api/admin/users/${id}/reject`, { method: 'POST' });
+                showToast('Доступ отозван');
+                loadUsers();
+            } catch {
+                showToast('Ошибка при отмене');
+            }
+        }
+
+        loadUsers();
+        setInterval(loadUsers, 30000);
+    </script>
+</body>
+</html>
