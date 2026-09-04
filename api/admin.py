@@ -17,7 +17,7 @@ def register_admin(app, bcrypt):
     def admin_login():
         if request.method == "POST":
             password = request.form.get("password", "")
-            admin_password = app.config.get("ADMIN_PASSWORD", "admin123")
+            admin_password = app.config["ADMIN_PASSWORD"]
             if password == admin_password:
                 session['admin_logged_in'] = True
                 return redirect(url_for('admin_panel'))
