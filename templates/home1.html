@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSHP: Личный кабинет</title>
+    <link rel="icon" href="/static/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --ink: #111111;
+            --ink-soft: #6b6b6b;
+            --surface: #ffffff;
+            --surface-alt: #f5f5f5;
+            --surface-hover: #eeeeee;
+            --line: #e2e2e2;
+            --accent: #5059FF;
+            --accent-hover: #3d44cc;
+            --accent-soft: rgba(80, 89, 255, 0.1);
+            --green: #4CAF50;
+            --green-soft: rgba(76, 175, 80, 0.1);
+            --radius-lg: 30px;
+            --radius-md: 20px;
+            --radius-sm: 14px;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+            --overlay: rgba(0,0,0,0.5);
+            --loader-bg: var(--accent);
+            --cover-overlay: rgba(0,0,0,0.15);
+            --lift-gradient: linear-gradient(135deg, #4446E1, #5d5fe0);
+            --weather-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --widget-schedule-bg: var(--surface-alt);
+            --service-bg: var(--surface-alt);
+            --service-shadow: var(--shadow-sm);
+            --add-panel-bg: var(--surface);
+            --add-item-bg: var(--surface-alt);
+            --add-item-hover: var(--surface-hover);
+            --edit-bg: var(--surface-alt);
+            --control-bg: var(--surface);
+            --control-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f0f12;
+                --ink: #f0f0f0;
+                --ink-soft: #8a8a9a;
+                --surface: rgba(28, 28, 35, 0.9);
+                --surface-alt: rgba(38, 38, 48, 0.7);
+                --surface-hover: rgba(50, 50, 62, 0.8);
+                --line: rgba(255,255,255,0.08);
+                --accent: #6b75ff;
+                --accent-hover: #818aff;
+                --accent-soft: rgba(107, 117, 255, 0.15);
+                --green: #5ccf62;
+                --green-soft: rgba(92, 207, 98, 0.15);
+                --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+                --shadow-md: 0 4px 20px rgba(0,0,0,0.3);
+                --shadow-lg: 0 10px 40px rgba(0,0,0,0.4);
+                --overlay: rgba(0,0,0,0.7);
+                --loader-bg: #1a1a24;
+                --cover-overlay: rgba(0,0,0,0.4);
+                --lift-gradient: linear-gradient(135deg, #3a3cc0, #4a4ce0);
+                --weather-gradient: linear-gradient(135deg, #3a8ad4 0%, #0090b0 100%);
+                --widget-schedule-bg: var(--surface-alt);
+                --service-bg: var(--surface-alt);
+                --service-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                --add-panel-bg: rgba(28, 28, 35, 0.95);
+                --add-item-bg: rgba(38, 38, 48, 0.6);
+                --add-item-hover: rgba(50, 50, 62, 0.7);
+                --edit-bg: rgba(38, 38, 48, 0.7);
+                --control-bg: var(--surface);
+                --control-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--ink);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--loader-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeOut 0.5s 2s forwards;
+        }
+        .loader h1 { color: white; font-size: 1.8rem; text-align: center; }
+
+        .cover {
+            height: 45vh;
+            min-height: 300px;
+            background: url('/static/wallpaper.png') center/cover;
+            position: relative;
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cover::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--cover-overlay);
+            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        }
+
+        .logo {
+            color: white;
+            text-align: center;
+            padding: 20px;
+            z-index: 2;
+        }
+        .logo h1 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 700; }
+
+        .services-block {
+            background: var(--surface);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 30px 20px 80px;
+            margin: -60px 15px 0;
+            position: relative;
+            z-index: 1;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .services-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--ink);
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .edit-btn, .save-btn {
+            background: none;
+            border: none;
+            color: var(--ink-soft);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 10px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .edit-btn:hover, .save-btn:hover { color: var(--ink); background: var(--surface-alt); }
+        .edit-btn .fa-edit, .edit-btn .fa-check { font-size: 0.85rem; }
+
+        .edit-mode .edit-btn { display: none; }
+        .save-btn { display: none; color: var(--green); }
+        .edit-mode .save-btn { display: flex; }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .service-item {
+            text-align: center;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            background: var(--service-bg);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none !important;
+            color: var(--ink);
+            position: relative;
+            padding-top: 50px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: var(--service-shadow);
+        }
+        .service-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+        .service-item a {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 1;
+        }
+
+        .service-item img {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        .service-item p {
+            font-size: 0.95rem;
+            line-height: 1.3;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .service-item.dragging {
+            z-index: 1000;
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .service-item .remove-btn, .widget .remove-btn {
+            position: absolute;
+            top: 6px; right: 6px;
+            background: rgba(255,59,48,0.1);
+            border: none;
+            color: #FF3B30;
+            cursor: pointer;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: none;
+            z-index: 2;
+            font-size: 11px;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .edit-mode .service-item .remove-btn, .edit-mode .widget .remove-btn { display: flex; }
+        .service-item .remove-btn:hover, .widget .remove-btn:hover { background: rgba(255,59,48,0.2); }
+
+        .edit-mode .service-item { cursor: move; }
+        .edit-mode .service-item a { pointer-events: none; }
+
+        .widget {
+            grid-column: span 2;
+            background: var(--surface-alt);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            box-shadow: var(--service-shadow);
+        }
+
+        .add-service-btn {
+            grid-column: span 2;
+            background: var(--add-item-bg);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px dashed var(--line);
+            transition: all 0.3s;
+            display: none;
+            margin-top: 8px;
+            color: var(--ink-soft);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .edit-mode .add-service-btn { display: block; }
+        .add-service-btn:hover { border-color: var(--ink-soft); background: var(--add-item-hover); }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay);
+            display: none;
+            z-index: 998;
+        }
+        .overlay.show { display: block; }
+
+        .add-panel {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--add-panel-bg);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            padding: 24px 20px 32px;
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.2);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+            z-index: 999;
+        }
+        .add-panel.show { transform: translateY(0); }
+        .add-panel h3 {
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .add-panel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .add-item {
+            text-align: center;
+            padding: 16px 10px;
+            border-radius: var(--radius-sm);
+            background: var(--add-item-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .add-item:hover { background: var(--add-item-hover); transform: translateY(-2px); }
+        .add-item img { width: 48px; height: 48px; margin-bottom: 8px; }
+        .add-item i { font-size: 36px; margin-bottom: 8px; color: var(--accent); }
+        .add-item p { margin: 0; font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+
+        /* Schedule Widget */
+        .widget.schedule {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px;
+        }
+        .schedule-current { font-size: 1.2rem; font-weight: bold; text-align: center; color: var(--ink); }
+        .schedule-time { font-size: 1rem; text-align: center; color: var(--ink-soft); }
+        .schedule-progress {
+            height: 4px;
+            background: var(--line);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .schedule-progress-bar {
+            height: 100%;
+            background: var(--green);
+            transition: width 1s linear;
+        }
+
+        /* Weather Widget */
+        .widget.weather {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: var(--weather-gradient);
+            color: white;
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .weather-icon { width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+        .weather-icon img { width: 100%; height: 100%; object-fit: contain; }
+        .weather-info { display: flex; flex-direction: column; align-items: flex-end; }
+        .weather-temp { font-size: 2.5rem; font-weight: bold; line-height: 1; margin-bottom: 5px; }
+        .weather-desc { font-size: 1rem; opacity: 0.9; }
+
+        /* Lift Widget */
+        .widget.lift {
+            padding: 16px;
+            background: var(--lift-gradient);
+            border-radius: var(--radius-md);
+            color: white;
+            box-shadow: 0 4px 15px rgba(68,70,225,0.25);
+        }
+        .lift-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; text-align: center; }
+        .lift-floors { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .lift-floor-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lift-floor-btn:hover { background: rgba(255,255,255,0.25); }
+        .lift-floor-btn:active { transform: scale(0.98); }
+        .lift-floor-btn.disabled { opacity: 0.5; pointer-events: none; cursor: not-allowed; }
+        .lift-status { margin-top: 10px; text-align: center; font-size: 0.9rem; opacity: 0.9; min-height: 20px; }
+
+        .lift-popup {
+            position: fixed; inset: 0;
+            background: var(--overlay);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        .lift-popup.shown { visibility: visible; opacity: 1; }
+        .lift-popup-content {
+            background: var(--surface);
+            font-weight: bold;
+            font-size: 18px;
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 20px;
+            transform: translateY(30px);
+            transition: all 0.3s;
+            color: var(--ink);
+        }
+        .lift-popup.shown .lift-popup-content { transform: translateY(0); }
+
+        /* Sortable */
+        .sortable-ghost { opacity: 0.3; background: var(--accent-soft) !important; border: 2px dashed var(--accent); }
+        .sortable-drag { opacity: 1 !important; transform: scale(1.1); box-shadow: var(--shadow-lg); z-index: 1000; }
+        .sortable-fallback {
+            position: absolute !important;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.95;
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+            transition: none !important;
+        }
+        .sortable-chosen { background: var(--surface-hover) !important; opacity: 0.9; }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        @media (min-width: 601px) {
+            body { padding: 20px 0; }
+            .container {
+                border-radius: var(--radius-lg);
+                overflow: hidden;
+                box-shadow: var(--shadow-lg);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .services-block { margin: -60px 10px 0; padding: 24px 16px 80px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loader">
+        <h1>Добро пожаловать,<br>{{ name }}!</h1>
+    </div>
+
+    <div class="container">
+        <div class="cover">
+            <div class="logo">
+                <img src="/static/1409 logo.png" alt="Логотип" style="height: 60px; margin-bottom: 15px;">
+                <h1>Здравствуйте,<br>{{ name }}</h1>
+            </div>
+        </div>
+
+        <div class="services-block">
+            <div class="services-header">
+                Доступные сервисы
+                <button class="edit-btn" onclick="toggleEditMode()" title="Редактировать">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="save-btn" onclick="toggleEditMode()" title="Сохранить">
+                    <i class="fas fa-check"></i>
+                </button>
+            </div>
+            <div class="services-grid" id="servicesGrid"></div>
+            <div class="add-service-btn" onclick="showAddPanel()">
+                <i class="fas fa-plus"></i> Добавить сервис или виджет
+            </div>
+        </div>
+
+        <div class="overlay" onclick="hideAddPanel()"></div>
+
+        <div class="add-panel" id="addPanel">
+            <h3>Добавить сервис или виджет</h3>
+            <div class="add-panel-grid">
+                <div class="add-item" onclick="addService('exit_application')">
+                    <img src="/static/menu/list-minimalistic-icon.png" alt="Заявки на выход">
+                    <p>Заявки на выход</p>
+                </div>
+                <div class="add-item" onclick="addService('lift')">
+                    <img src="/static/menu/elevator-minimalistic-icon.png" alt="Лифт">
+                    <p>Лифт</p>
+                </div>
+                <div class="add-item" onclick="addService('events')">
+                    <img src="/static/menu/events-minimalistic-icon.png" alt="Мероприятия">
+                    <p>Мероприятия</p>
+                </div>
+                <div class="add-item" onclick="addService('duma')">
+                    <img src="/static/menu/rostrum-minimalistic-icon.png" alt="Дума">
+                    <p>Дума</p>
+                </div>
+                <div class="add-item" onclick="addService('account')">
+                    <img src="/static/menu/accounts-minimalistic-icon.png" alt="Аккаунт">
+                    <p>Аккаунт</p>
+                </div>
+                <div class="add-item" onclick="addService('support')">
+                    <img src="/static/menu/tech-support-minimalistic-icon.png" alt="Поддержка">
+                    <p>Поддержка</p>
+                </div>
+                <div class="add-item" onclick="addWidget('schedule')">
+                    <i class="fas fa-clock"></i>
+                    <p>Расписание звонков</p>
+                </div>
+                <div class="add-item" onclick="addWidget('weather')">
+                    <i class="fas fa-cloud-sun"></i>
+                    <p>Погода</p>
+                </div>
+                <div class="add-item" onclick="addWidget('lift')">
+                    <i class="fas fa-elevator"></i>
+                    <p>Лифт</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="lift-popup" id="liftPopup">
+        <div class="lift-popup-content">
+            <p>Лифт вызван!</p>
+        </div>
+    </div>
+
+    <audio id="liftSound">
+        <source src="/static/lift.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        setTimeout(() => {
+            const loader = document.querySelector('.loader');
+            if (loader) loader.style.display = 'none';
+        }, 6500);
+
+        let services = [
+            { id: 'exit_application', title: 'Заявки на выход', icon: '/static/menu/list-minimalistic-icon.png', url: '/create_exit_application' },
+            { id: 'lift', title: 'Лифт', icon: '/static/menu/elevator-minimalistic-icon.png', url: '/create-lift-application' },
+            { id: 'events', title: 'Мероприятия', icon: '/static/menu/events-minimalistic-icon.png', url: 'https://event.school1409.ru' },
+            { id: 'duma', title: 'Дума', icon: '/static/menu/rostrum-minimalistic-icon.png', url: 'https://info.school1409.ru' },
+            { id: 'account', title: 'Аккаунт', icon: '/static/menu/accounts-minimalistic-icon.png', url: '/account' },
+            { id: 'support', title: 'Поддержка', icon: '/static/menu/tech-support-minimalistic-icon.png', url: 'https://t.me/dit1409_bot' }
+        ];
+
+        const schedule = [
+            { start: '08:30', end: '09:15', type: 'lesson', name: '1 урок' },
+            { start: '09:15', end: '09:25', type: 'break', name: 'перемена' },
+            { start: '09:25', end: '10:10', type: 'lesson', name: '2 урок' },
+            { start: '10:10', end: '10:25', type: 'break', name: 'перемена' },
+            { start: '10:25', end: '11:10', type: 'lesson', name: '3 урок' },
+            { start: '11:10', end: '11:25', type: 'break', name: 'перемена' },
+            { start: '11:25', end: '12:10', type: 'lesson', name: '4 урок' },
+            { start: '12:10', end: '12:30', type: 'break', name: 'перемена' },
+            { start: '12:30', end: '13:15', type: 'lesson', name: '5 урок' },
+            { start: '13:15', end: '13:25', type: 'break', name: 'перемена' },
+            { start: '13:25', end: '14:10', type: 'lesson', name: '6 урок' },
+            { start: '14:10', end: '14:20', type: 'break', name: 'перемена' },
+            { start: '14:20', end: '15:05', type: 'lesson', name: '7 урок' },
+            { start: '15:05', end: '15:10', type: 'break', name: 'перемена' },
+            { start: '15:10', end: '15:55', type: 'lesson', name: '8 урок' }
+        ];
+
+        function loadUserLayout() {
+            fetch('/api/user/services/layout')
+                .then(r => r.json())
+                .then(layout => {
+                    const grid = document.getElementById('servicesGrid');
+                    grid.innerHTML = '';
+                    layout.forEach(item => {
+                        if (item.is_widget) {
+                            addWidgetToGrid(item);
+                        } else {
+                            const service = services.find(s => s.id === item.service_id);
+                            if (service) addServiceToGrid(service, item);
+                        }
+                    });
+                    initSortable();
+                });
+        }
+
+        function addServiceToGrid(service, layoutItem) {
+            const grid = document.getElementById('servicesGrid');
+            const item = document.createElement('div');
+            item.className = 'service-item';
+            item.dataset.id = layoutItem.id;
+            item.dataset.serviceId = service.id;
+            item.style.order = layoutItem.position;
+            item.innerHTML = `
+                <a href="${service.url}"></a>
+                <img src="${service.icon}" alt="${service.title}">
+                <p>${service.title}</p>
+                <button class="remove-btn" onclick="event.stopPropagation(); removeItem('${layoutItem.id}')">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            item.addEventListener('click', function() {
+                if (!document.body.classList.contains('edit-mode')) {
+                    window.location.href = service.url;
+                }
+            });
+            grid.appendChild(item);
+        }
+
+        function addWidgetToGrid(layoutItem) {
+            const grid = document.getElementById('servicesGrid');
+            const widget = document.createElement('div');
+            widget.className = `widget ${layoutItem.widget_type}`;
+            widget.dataset.id = layoutItem.id;
+            widget.style.order = layoutItem.position;
+
+            if (layoutItem.widget_type === 'schedule') {
+                widget.innerHTML = `
+                    <button class="remove-btn" onclick="removeItem('${layoutItem.id}')"><i class="fas fa-times"></i></button>
+                    <div class="schedule-current"></div>
+                    <div class="schedule-time"></div>
+                    <div class="schedule-progress"><div class="schedule-progress-bar"></div></div>
+                `;
+                updateScheduleWidget(widget);
+                setInterval(() => updateScheduleWidget(widget), 1000);
+            } else if (layoutItem.widget_type === 'weather') {
+                widget.innerHTML = `
+                    <button class="remove-btn" onclick="removeItem('${layoutItem.id}')"><i class="fas fa-times"></i></button>
+                    <div class="weather-icon"><img src="https://yastatic.net/weather/i/icons/blueye/48/ovc.png" alt="Погода"></div>
+                    <div class="weather-info">
+                        <div class="weather-temp">+15°C</div>
+                        <div class="weather-desc">Загрузка...</div>
+                    </div>
+                `;
+                setTimeout(() => updateWeatherWidget(widget), 100);
+                setInterval(() => updateWeatherWidget(widget), 30 * 60 * 1000);
+            } else if (layoutItem.widget_type === 'lift') {
+                widget.innerHTML = `
+                    <button class="remove-btn" onclick="removeItem('${layoutItem.id}')"><i class="fas fa-times"></i></button>
+                    <div class="lift-title">Вызов лифта</div>
+                    <div class="lift-floors">
+                        <button class="lift-floor-btn" data-floor="1">1 этаж</button>
+                        <button class="lift-floor-btn disabled" data-floor="2">2 этаж</button>
+                        <button class="lift-floor-btn disabled" data-floor="3">3 этаж</button>
+                        <button class="lift-floor-btn" data-floor="4">4 этаж</button>
+                    </div>
+                    <div class="lift-status"></div>
+                `;
+                widget.querySelectorAll('.lift-floor-btn:not(.disabled)').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        callLift(this.getAttribute('data-floor'), widget);
+                    });
+                });
+            }
+            grid.appendChild(widget);
+        }
+
+        function initSortable() {
+            const gridEl = document.getElementById('servicesGrid');
+            if (window.sortableInstance) window.sortableInstance.destroy();
+            if (document.body.classList.contains('edit-mode')) {
+                window.sortableInstance = new Sortable(gridEl, {
+                    animation: 150,
+                    easing: "cubic-bezier(1, 0, 0, 1)",
+                    fallbackOnBody: true,
+                    swapThreshold: 0.65,
+                    forceFallback: true,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    fallbackClass: 'sortable-fallback',
+                    dragClass: 'sortable-drag',
+                    delay: 0,
+                    delayOnTouchOnly: false,
+                    touchStartThreshold: 3,
+                    onEnd: function(evt) {
+                        const items = Array.from(evt.to.children).map((el, i) => ({ id: el.dataset.id, position: i }));
+                        updatePositions(items);
+                    }
+                });
+            }
+        }
+
+        function updatePositions(items) {
+            fetch('/api/user/services/layout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update_position', items })
+            }).then(r => r.json()).then(d => {
+                if (d.status === 'success') loadUserLayout();
+            }).catch(() => loadUserLayout());
+        }
+
+        function removeItem(id) {
+            if (confirm('Удалить этот элемент?')) {
+                fetch('/api/user/services/layout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'remove', id })
+                }).then(() => loadUserLayout());
+            }
+        }
+
+        function showAddPanel() {
+            document.querySelector('.overlay').classList.add('show');
+            document.getElementById('addPanel').classList.add('show');
+        }
+        function hideAddPanel() {
+            document.querySelector('.overlay').classList.remove('show');
+            document.getElementById('addPanel').classList.remove('show');
+        }
+
+        function addService(serviceId) {
+            fetch('/api/user/services/layout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'add_service', service_id: serviceId, position: document.getElementById('servicesGrid').children.length })
+            }).then(() => { hideAddPanel(); loadUserLayout(); });
+        }
+
+        function addWidget(widgetType) {
+            fetch('/api/user/services/layout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'add_widget', widget_type: widgetType, position: document.getElementById('servicesGrid').children.length })
+            }).then(() => { hideAddPanel(); loadUserLayout(); });
+        }
+
+        function getCurrentScheduleItem() {
+            const now = new Date();
+            const cur = now.getHours() * 60 + now.getMinutes();
+            for (const item of schedule) {
+                const [sh, sm] = item.start.split(':').map(Number);
+                const [eh, em] = item.end.split(':').map(Number);
+                const start = sh * 60 + sm, end = eh * 60 + em;
+                if (cur >= start && cur < end) {
+                    return { item, progress: ((cur - start) / (end - start)) * 100 };
+                }
+            }
+            return null;
+        }
+
+        function updateScheduleWidget(widget) {
+            const current = getCurrentScheduleItem();
+            const curEl = widget.querySelector('.schedule-current');
+            const timeEl = widget.querySelector('.schedule-time');
+            const barEl = widget.querySelector('.schedule-progress-bar');
+            if (!current) {
+                curEl.textContent = 'Уроки закончились';
+                timeEl.textContent = '';
+                barEl.style.width = '0%';
+                return;
+            }
+            const now = new Date();
+            const [h, m] = current.item.end.split(':').map(Number);
+            const end = new Date(); end.setHours(h, m, 0);
+            const mins = Math.floor((end - now) / 60000);
+            curEl.textContent = current.item.name;
+            timeEl.textContent = mins > 0 ? `До звонка: ${mins} мин` : 'Звонок!';
+            barEl.style.width = `${current.progress}%`;
+        }
+
+        async function updateWeatherWidget(widget) {
+            try {
+                const r = await fetch('/api/weather');
+                if (!r.ok) throw new Error(r.status);
+                const data = await r.json();
+                widget.querySelector('.weather-temp').textContent = `${data.temp > 0 ? '+' : ''}${data.temp}°C`;
+                widget.querySelector('.weather-desc').textContent = getWeatherConditionText(data.condition);
+                widget.querySelector('.weather-icon img').src = getWeatherIconUrl(data.condition, data.is_day);
+            } catch {
+                widget.querySelector('.weather-temp').textContent = '+20°C';
+                widget.querySelector('.weather-desc').textContent = 'Облачно';
+            }
+        }
+
+        function getWeatherIconUrl(condition) {
+            const map = { 'clear':'skc','partly-cloudy':'bkn','cloudy':'ovc','overcast':'ovc','drizzle':'ra','rain':'ra','heavy-rain':'downpour','showers':'ra','thunderstorm':'ts','thunderstorm-with-rain':'ts_ra','snow':'sn','snow-showers':'sn','hail':'gs','fog':'fg' };
+            return `https://yastatic.net/weather/i/icons/blueye/48/${map[condition] || 'ovc'}.png`;
+        }
+
+        function getWeatherConditionText(condition) {
+            const map = { 'clear':'Ясно','partly-cloudy':'Малооблачно','cloudy':'Облачно','overcast':'Пасмурно','drizzle':'Морось','rain':'Дождь','heavy-rain':'Сильный дождь','showers':'Ливень','thunderstorm':'Гроза','thunderstorm-with-rain':'Дождь с грозой','snow':'Снег','snow-showers':'Снегопад','hail':'Град','fog':'Туман' };
+            return map[condition] || 'Облачно';
+        }
+
+        function toggleEditMode() {
+            document.body.classList.toggle('edit-mode');
+            initSortable();
+        }
+
+        let liftCheckInterval = null;
+
+        function callLift(floor, widget) {
+            const statusEl = widget.querySelector('.lift-status');
+            statusEl.textContent = 'Ожидание...';
+            widget.querySelectorAll('.lift-floor-btn').forEach(b => b.classList.add('disabled'));
+            fetch(`/api/lift/${floor}`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (liftCheckInterval) clearInterval(liftCheckInterval);
+                    liftCheckInterval = setInterval(() => checkLiftStatus(data.id, widget), 1000);
+                })
+                .catch(() => {
+                    statusEl.textContent = 'Ошибка вызова!';
+                    setTimeout(() => {
+                        statusEl.textContent = '';
+                        widget.querySelectorAll('.lift-floor-btn:not(.permanently-disabled)').forEach(b => b.classList.remove('disabled'));
+                    }, 2000);
+                });
+        }
+
+        function checkLiftStatus(id, widget) {
+            fetch(`/api/lift/status/${id}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.is_used) {
+                        clearInterval(liftCheckInterval);
+                        widget.querySelector('.lift-status').textContent = '';
+                        document.getElementById('liftPopup').classList.add('shown');
+                        document.getElementById('liftSound').play();
+                        setTimeout(() => {
+                            document.getElementById('liftPopup').classList.remove('shown');
+                            widget.querySelectorAll('.lift-floor-btn:not(.permanently-disabled)').forEach(b => b.classList.remove('disabled'));
+                        }, 2000);
+                    }
+                }).catch(() => {});
+        }
+
+        document.addEventListener('DOMContentLoaded', loadUserLayout);
+    </script>
+</body>
+</html>
